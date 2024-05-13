@@ -896,6 +896,7 @@ namespace libframe4
 			CheckConnected();
 
 			// set timeout as it was causing issues on certain processes
+			// not a good solution but will have to do until we come up with our own loader
 			int saved = sock.ReceiveTimeout;
 			sock.ReceiveTimeout = int.MaxValue;
 
