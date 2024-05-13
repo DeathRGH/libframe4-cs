@@ -7,7 +7,7 @@ namespace libframe4
 	{
 		// console
 		// packet sizes
-		
+
 		// send size
 		private const int CMD_CONSOLE_PRINT_PACKET_SIZE = 4;
 		private const int CMD_CONSOLE_NOTIFY_PACKET_SIZE = 8;

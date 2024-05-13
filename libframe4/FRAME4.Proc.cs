@@ -7,108 +7,108 @@ using System.Text;
 
 namespace libframe4
 {
-    public partial class FRAME4
-    {
-        // proc
-        // packet sizes
+	public partial class FRAME4
+	{
+		// proc
+		// packet sizes
 
-        // send size
-        private const int CMD_PROC_READ_PACKET_SIZE = 16;
-        private const int CMD_PROC_WRITE_PACKET_SIZE = 16;
-        private const int CMD_PROC_MAPS_PACKET_SIZE = 4;
-        private const int CMD_PROC_INSTALL_PACKET_SIZE = 4;
-        private const int CMD_PROC_CALL_PACKET_SIZE = 68;
-        private const int CMD_PROC_ELF_PACKET_SIZE = 8;
-        private const int CMD_PROC_PROTECT_PACKET_SIZE = 20;
+		// send size
+		private const int CMD_PROC_READ_PACKET_SIZE = 16;
+		private const int CMD_PROC_WRITE_PACKET_SIZE = 16;
+		private const int CMD_PROC_MAPS_PACKET_SIZE = 4;
+		private const int CMD_PROC_INSTALL_PACKET_SIZE = 4;
+		private const int CMD_PROC_CALL_PACKET_SIZE = 68;
+		private const int CMD_PROC_ELF_PACKET_SIZE = 8;
+		private const int CMD_PROC_PROTECT_PACKET_SIZE = 20;
 		private const int CMD_PROC_SCAN_PACKET_SIZE = 14;
 		private const int CMD_PROC_INFO_PACKET_SIZE = 4;
-        private const int CMD_PROC_ALLOC_PACKET_SIZE = 8;
-        private const int CMD_PROC_FREE_PACKET_SIZE = 16;
+		private const int CMD_PROC_ALLOC_PACKET_SIZE = 8;
+		private const int CMD_PROC_FREE_PACKET_SIZE = 16;
 
-        private const int CMD_SCAN_START_PACKET_SIZE = 24;
+		private const int CMD_SCAN_START_PACKET_SIZE = 24;
 		private const int CMD_SCAN_NEXTSCAN_PACKET_SIZE = 8;
 		private const int CMD_SCAN_GET_RESULTS_PACKET_SIZE = 4;
 		private const int CMD_SCAN_COUNT_RESULTS_PACKET_SIZE = 4;
 		private const int CMD_SCAN_END_PACKET_SIZE = 4;
 
-        private const int CMD_PROC_PRX_UNLOAD_PACKET_SIZE = 4;
+		private const int CMD_PROC_PRX_UNLOAD_PACKET_SIZE = 4;
 
-        // receive size
-        private const int PROC_LIST_ENTRY_SIZE = 36;
-        private const int PROC_MAP_ENTRY_SIZE = 58;
-        private const int PROC_INSTALL_SIZE = 8;
-        private const int PROC_CALL_SIZE = 12;
+		// receive size
+		private const int PROC_LIST_ENTRY_SIZE = 36;
+		private const int PROC_MAP_ENTRY_SIZE = 58;
+		private const int PROC_INSTALL_SIZE = 8;
+		private const int PROC_CALL_SIZE = 12;
 		private const int PROC_ELF_SIZE = 8;
 		private const int PROC_PROC_INFO_SIZE = 188;
-        private const int PROC_ALLOC_SIZE = 8;
+		private const int PROC_ALLOC_SIZE = 8;
 
-        private const int CMD_SCAN_COUNT_RESULTS_RESPONSE_SIZE = 8;
+		private const int CMD_SCAN_COUNT_RESULTS_RESPONSE_SIZE = 8;
 
-        private const int CMD_PROC_PRX_LOAD_RESPONSE_SIZE = 4;
+		private const int CMD_PROC_PRX_LOAD_RESPONSE_SIZE = 4;
 
-        /// <summary>
-        /// Get current process list
-        /// </summary>
-        /// <returns></returns>
-        public ProcessList GetProcessList()
-        {
-            CheckConnected();
+		/// <summary>
+		/// Get current process list
+		/// </summary>
+		/// <returns></returns>
+		public ProcessList GetProcessList()
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_LIST, 0);
-            CheckStatus();
+			SendCMDPacket(CMDS.CMD_PROC_LIST, 0);
+			CheckStatus();
 
-            // recv count
-            byte[] bytes = new byte[4];
-            sock.Receive(bytes, 4, SocketFlags.None);
-            int number = BitConverter.ToInt32(bytes, 0);
+			// recv count
+			byte[] bytes = new byte[4];
+			sock.Receive(bytes, 4, SocketFlags.None);
+			int number = BitConverter.ToInt32(bytes, 0);
 
-            // recv data
-            byte[] data = ReceiveData(number * PROC_LIST_ENTRY_SIZE);
+			// recv data
+			byte[] data = ReceiveData(number * PROC_LIST_ENTRY_SIZE);
 
-            // parse data
-            string[] names = new string[number];
-            int[] pids = new int[number];
-            for (int i = 0; i < number; i++)
-            {
-                int offset = i * PROC_LIST_ENTRY_SIZE;
-                names[i] = ConvertASCII(data, offset);
-                pids[i] = BitConverter.ToInt32(data, offset + 32);
-            }
+			// parse data
+			string[] names = new string[number];
+			int[] pids = new int[number];
+			for (int i = 0; i < number; i++)
+			{
+				int offset = i * PROC_LIST_ENTRY_SIZE;
+				names[i] = ConvertASCII(data, offset);
+				pids[i] = BitConverter.ToInt32(data, offset + 32);
+			}
 
-            return new ProcessList(number, names, pids);
-        }
+			return new ProcessList(number, names, pids);
+		}
 
-        /// <summary>
-        /// Read memory
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="address">Memory address</param>
-        /// <param name="length">Data length</param>
-        /// <returns></returns>
-        public byte[] ReadMemory(int pid, ulong address, int length)
-        {
-            CheckConnected();
+		/// <summary>
+		/// Read memory
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="address">Memory address</param>
+		/// <param name="length">Data length</param>
+		/// <returns></returns>
+		public byte[] ReadMemory(int pid, ulong address, int length)
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_READ, CMD_PROC_READ_PACKET_SIZE, pid, address, length);
-            CheckStatus();
-            return ReceiveData(length);
-        }
+			SendCMDPacket(CMDS.CMD_PROC_READ, CMD_PROC_READ_PACKET_SIZE, pid, address, length);
+			CheckStatus();
+			return ReceiveData(length);
+		}
 
-        /// <summary>
-        /// Write memory
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="address">Memory address</param>
-        /// <param name="data">Data</param>
-        public void WriteMemory(int pid, ulong address, byte[] data)
-        {
-            CheckConnected();
+		/// <summary>
+		/// Write memory
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="address">Memory address</param>
+		/// <param name="data">Data</param>
+		public void WriteMemory(int pid, ulong address, byte[] data)
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_WRITE, CMD_PROC_WRITE_PACKET_SIZE, pid, address, data.Length);
-            CheckStatus();
-            SendData(data, data.Length);
-            CheckStatus();
-        }
+			SendCMDPacket(CMDS.CMD_PROC_WRITE, CMD_PROC_WRITE_PACKET_SIZE, pid, address, data.Length);
+			CheckStatus();
+			SendData(data, data.Length);
+			CheckStatus();
+		}
 
 		// read wrappers
 		/// <summary>
@@ -191,26 +191,26 @@ namespace libframe4
 			return BitConverter.ToUInt64(ReadMemory(pid, address, sizeof(UInt64)), 0);
 		}
 
-        // write wrappers
-        /// <summary>
-        /// Write SByte
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="address">Memory address</param>
-        /// <param name="value">SByte to write</param>
-        public void WriteSByte(int pid, ulong address, SByte value)
-        {
-            WriteMemory(pid, address, new byte[] { (byte)value });
-        }
+		// write wrappers
+		/// <summary>
+		/// Write SByte
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="address">Memory address</param>
+		/// <param name="value">SByte to write</param>
+		public void WriteSByte(int pid, ulong address, SByte value)
+		{
+			WriteMemory(pid, address, new byte[] { (byte)value });
+		}
 
-        // write wrappers
-        /// <summary>
-        /// Write Byte
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="address">Memory address</param>
-        /// <param name="value">Byte to write</param>
-        public void WriteByte(int pid, ulong address, Byte value)
+		// write wrappers
+		/// <summary>
+		/// Write Byte
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="address">Memory address</param>
+		/// <param name="value">Byte to write</param>
+		public void WriteByte(int pid, ulong address, Byte value)
 		{
 			WriteMemory(pid, address, new byte[] { value });
 		}
@@ -407,153 +407,153 @@ namespace libframe4
 		/// <param name="pid">Process ID</param>
 		/// <returns></returns>
 		public ProcessMap GetProcessMaps(int pid)
-        {
-            CheckConnected();
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_MAPS, CMD_PROC_MAPS_PACKET_SIZE, pid);
-            CheckStatus();
+			SendCMDPacket(CMDS.CMD_PROC_MAPS, CMD_PROC_MAPS_PACKET_SIZE, pid);
+			CheckStatus();
 
-            // recv count
-            byte[] bnumber = new byte[4];
-            sock.Receive(bnumber, 4, SocketFlags.None);
-            int number = BitConverter.ToInt32(bnumber, 0);
+			// recv count
+			byte[] bnumber = new byte[4];
+			sock.Receive(bnumber, 4, SocketFlags.None);
+			int number = BitConverter.ToInt32(bnumber, 0);
 
-            // recv data
-            byte[] data = ReceiveData(number * PROC_MAP_ENTRY_SIZE);
+			// recv data
+			byte[] data = ReceiveData(number * PROC_MAP_ENTRY_SIZE);
 
-            // parse data
-            MemoryEntry[] entries = new MemoryEntry[number];
-            for (int i = 0; i < number; i++)
-            {
-                int offset = i * PROC_MAP_ENTRY_SIZE;
-                entries[i] = new MemoryEntry
-                {
-                    name = ConvertASCII(data, offset),
-                    start = BitConverter.ToUInt64(data, offset + 32),
-                    end = BitConverter.ToUInt64(data, offset + 40),
-                    offset = BitConverter.ToUInt64(data, offset + 48),
-                    prot = BitConverter.ToUInt16(data, offset + 56)
-                };
+			// parse data
+			MemoryEntry[] entries = new MemoryEntry[number];
+			for (int i = 0; i < number; i++)
+			{
+				int offset = i * PROC_MAP_ENTRY_SIZE;
+				entries[i] = new MemoryEntry
+				{
+					name = ConvertASCII(data, offset),
+					start = BitConverter.ToUInt64(data, offset + 32),
+					end = BitConverter.ToUInt64(data, offset + 40),
+					offset = BitConverter.ToUInt64(data, offset + 48),
+					prot = BitConverter.ToUInt16(data, offset + 56)
+				};
 
-            }
+			}
 
-            return new ProcessMap(pid, entries);
-        }
+			return new ProcessMap(pid, entries);
+		}
 
-        /// <summary>
-        /// Install RPC into a process, this returns a stub address that you should pass into call functions
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <returns></returns>
-        public ulong InstallRPC(int pid)
-        {
-            CheckConnected();
+		/// <summary>
+		/// Install RPC into a process, this returns a stub address that you should pass into call functions
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <returns></returns>
+		public ulong InstallRPC(int pid)
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_INSTALL, CMD_PROC_INSTALL_PACKET_SIZE, pid);
-            CheckStatus();
+			SendCMDPacket(CMDS.CMD_PROC_INSTALL, CMD_PROC_INSTALL_PACKET_SIZE, pid);
+			CheckStatus();
 
-            return BitConverter.ToUInt64(ReceiveData(PROC_INSTALL_SIZE), 0);
-        }
+			return BitConverter.ToUInt64(ReceiveData(PROC_INSTALL_SIZE), 0);
+		}
 
-        /// <summary>
-        /// Call function (returns rax)
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="rpcstub">Stub address from InstallRPC</param>
-        /// <param name="address">Address to call</param>
-        /// <param name="args">Arguments array</param>
-        /// <returns></returns>
-        public ulong Call(int pid, ulong rpcstub, ulong address, params object[] args)
-        {
-            CheckConnected();
+		/// <summary>
+		/// Call function (returns rax)
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="rpcstub">Stub address from InstallRPC</param>
+		/// <param name="address">Address to call</param>
+		/// <param name="args">Arguments array</param>
+		/// <returns></returns>
+		public ulong Call(int pid, ulong rpcstub, ulong address, params object[] args)
+		{
+			CheckConnected();
 
-            // need to do this in a custom format
-            CMDPacket packet = new CMDPacket
-            {
-                magic = CMD_PACKET_MAGIC,
-                cmd = (uint) CMDS.CMD_PROC_CALL,
-                datalen = (uint) CMD_PROC_CALL_PACKET_SIZE
-            };
-            SendData(GetBytesFromObject(packet), CMD_PACKET_SIZE);
+			// need to do this in a custom format
+			CMDPacket packet = new CMDPacket
+			{
+				magic = CMD_PACKET_MAGIC,
+				cmd = (uint)CMDS.CMD_PROC_CALL,
+				datalen = (uint)CMD_PROC_CALL_PACKET_SIZE
+			};
+			SendData(GetBytesFromObject(packet), CMD_PACKET_SIZE);
 
-            MemoryStream rs = new MemoryStream();
-            rs.Write(BitConverter.GetBytes(pid), 0, sizeof(int));
-            rs.Write(BitConverter.GetBytes(rpcstub), 0, sizeof(ulong));
-            rs.Write(BitConverter.GetBytes(address), 0, sizeof(ulong));
+			MemoryStream rs = new MemoryStream();
+			rs.Write(BitConverter.GetBytes(pid), 0, sizeof(int));
+			rs.Write(BitConverter.GetBytes(rpcstub), 0, sizeof(ulong));
+			rs.Write(BitConverter.GetBytes(address), 0, sizeof(ulong));
 
-            int num = 0;
-            foreach (object arg in args)
-            {
-                byte[] bytes = new byte[8];
+			int num = 0;
+			foreach (object arg in args)
+			{
+				byte[] bytes = new byte[8];
 
-                switch (arg)
-                {
-                    case char c:
-                        {
-                            byte[] tmp = BitConverter.GetBytes(c);
-                            Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(char));
+				switch (arg)
+				{
+					case char c:
+						{
+							byte[] tmp = BitConverter.GetBytes(c);
+							Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(char));
 
-                            byte[] pad = new byte[sizeof(ulong) - sizeof(char)];
-                            Buffer.BlockCopy(pad, 0, bytes, sizeof(char), pad.Length);
-                            break;
-                        }
-                    case byte b:
-                        {
-                            byte[] tmp = BitConverter.GetBytes(b);
-                            Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(byte));
+							byte[] pad = new byte[sizeof(ulong) - sizeof(char)];
+							Buffer.BlockCopy(pad, 0, bytes, sizeof(char), pad.Length);
+							break;
+						}
+					case byte b:
+						{
+							byte[] tmp = BitConverter.GetBytes(b);
+							Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(byte));
 
-                            byte[] pad = new byte[sizeof(ulong) - sizeof(byte)];
-                            Buffer.BlockCopy(pad, 0, bytes, sizeof(byte), pad.Length);
-                            break;
-                        }
-                    case short s:
-                        {
-                            byte[] tmp = BitConverter.GetBytes(s);
-                            Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(short));
+							byte[] pad = new byte[sizeof(ulong) - sizeof(byte)];
+							Buffer.BlockCopy(pad, 0, bytes, sizeof(byte), pad.Length);
+							break;
+						}
+					case short s:
+						{
+							byte[] tmp = BitConverter.GetBytes(s);
+							Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(short));
 
-                            byte[] pad = new byte[sizeof(ulong) - sizeof(short)];
-                            Buffer.BlockCopy(pad, 0, bytes, sizeof(short), pad.Length);
-                            break;
-                        }
-                    case ushort us:
-                        {
-                            byte[] tmp = BitConverter.GetBytes(us);
-                            Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(ushort));
+							byte[] pad = new byte[sizeof(ulong) - sizeof(short)];
+							Buffer.BlockCopy(pad, 0, bytes, sizeof(short), pad.Length);
+							break;
+						}
+					case ushort us:
+						{
+							byte[] tmp = BitConverter.GetBytes(us);
+							Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(ushort));
 
-                            byte[] pad = new byte[sizeof(ulong) - sizeof(ushort)];
-                            Buffer.BlockCopy(pad, 0, bytes, sizeof(ushort), pad.Length);
-                            break;
-                        }
-                    case int i:
-                        {
-                            byte[] tmp = BitConverter.GetBytes(i);
-                            Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(int));
+							byte[] pad = new byte[sizeof(ulong) - sizeof(ushort)];
+							Buffer.BlockCopy(pad, 0, bytes, sizeof(ushort), pad.Length);
+							break;
+						}
+					case int i:
+						{
+							byte[] tmp = BitConverter.GetBytes(i);
+							Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(int));
 
-                            byte[] pad = new byte[sizeof(ulong) - sizeof(int)];
-                            Buffer.BlockCopy(pad, 0, bytes, sizeof(int), pad.Length);
-                            break;
-                        }
-                    case uint ui:
-                        {
-                            byte[] tmp = BitConverter.GetBytes(ui);
-                            Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(uint));
+							byte[] pad = new byte[sizeof(ulong) - sizeof(int)];
+							Buffer.BlockCopy(pad, 0, bytes, sizeof(int), pad.Length);
+							break;
+						}
+					case uint ui:
+						{
+							byte[] tmp = BitConverter.GetBytes(ui);
+							Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(uint));
 
-                            byte[] pad = new byte[sizeof(ulong) - sizeof(uint)];
-                            Buffer.BlockCopy(pad, 0, bytes, sizeof(uint), pad.Length);
-                            break;
-                        }
-                    case long l:
-                        {
-                            byte[] tmp = BitConverter.GetBytes(l);
-                            Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(long));
-                            break;
-                        }
-                    case ulong ul:
-                        {
-                            byte[] tmp = BitConverter.GetBytes(ul);
-                            Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(ulong));
-                            break;
-                        }
+							byte[] pad = new byte[sizeof(ulong) - sizeof(uint)];
+							Buffer.BlockCopy(pad, 0, bytes, sizeof(uint), pad.Length);
+							break;
+						}
+					case long l:
+						{
+							byte[] tmp = BitConverter.GetBytes(l);
+							Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(long));
+							break;
+						}
+					case ulong ul:
+						{
+							byte[] tmp = BitConverter.GetBytes(ul);
+							Buffer.BlockCopy(tmp, 0, bytes, 0, sizeof(ulong));
+							break;
+						}
 					case float f:
 						{
 							byte[] tmp = BitConverter.GetBytes(f);
@@ -571,207 +571,207 @@ namespace libframe4
 						}
 				}
 
-                rs.Write(bytes, 0, bytes.Length);
-                num++;
-            }
+				rs.Write(bytes, 0, bytes.Length);
+				num++;
+			}
 
-            if (num > 6)
-            {
-                throw new Exception("libframe4: too many arguments");
-            }
+			if (num > 6)
+			{
+				throw new Exception("libframe4: too many arguments");
+			}
 
-            if (num < 6)
-            {
-                for (int i = 0; i < (6 - num); i++)
-                {
-                    rs.Write(BitConverter.GetBytes((ulong)0), 0, sizeof(ulong));
-                }
-            }
+			if (num < 6)
+			{
+				for (int i = 0; i < (6 - num); i++)
+				{
+					rs.Write(BitConverter.GetBytes((ulong)0), 0, sizeof(ulong));
+				}
+			}
 
-            SendData(rs.ToArray(), CMD_PROC_CALL_PACKET_SIZE);
-            rs.Dispose();
+			SendData(rs.ToArray(), CMD_PROC_CALL_PACKET_SIZE);
+			rs.Dispose();
 
-            CheckStatus();
+			CheckStatus();
 
-            byte[] data = ReceiveData(PROC_CALL_SIZE);
-            return BitConverter.ToUInt64(data, 4);
-        }
+			byte[] data = ReceiveData(PROC_CALL_SIZE);
+			return BitConverter.ToUInt64(data, 4);
+		}
 
-        /// <summary>
-        /// Load elf
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="elf">Elf</param>
-        public ulong LoadElf(int pid, byte[] elf)
-        {
-            CheckConnected();
+		/// <summary>
+		/// Load elf
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="elf">Elf</param>
+		public ulong LoadElf(int pid, byte[] elf)
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_ELF, CMD_PROC_ELF_PACKET_SIZE, pid, (uint)elf.Length);
-            CheckStatus();
-            SendData(elf, elf.Length);
-            CheckStatus();
+			SendCMDPacket(CMDS.CMD_PROC_ELF, CMD_PROC_ELF_PACKET_SIZE, pid, (uint)elf.Length);
+			CheckStatus();
+			SendData(elf, elf.Length);
+			CheckStatus();
 
 			return BitConverter.ToUInt64(ReceiveData(PROC_ELF_SIZE), 0);
 		}
 
-        /// <summary>
-        /// Load elf
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="filename">Elf filename</param>
-        public ulong LoadElf(int pid, string filename)
-        {
-            return LoadElf(pid, File.ReadAllBytes(filename));
-        }
+		/// <summary>
+		/// Load elf
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="filename">Elf filename</param>
+		public ulong LoadElf(int pid, string filename)
+		{
+			return LoadElf(pid, File.ReadAllBytes(filename));
+		}
 
-        public enum ScanValueType : byte
-        {
-            valTypeUInt8 = 0,
-            valTypeInt8,
-            valTypeUInt16,
-            valTypeInt16,
-            valTypeUInt32,
-            valTypeInt32,
-            valTypeUInt64,
-            valTypeInt64,
-            valTypeFloat,
-            valTypeDouble,
-            valTypeArrBytes,
-            valTypeString
-        }
+		public enum ScanValueType : byte
+		{
+			valTypeUInt8 = 0,
+			valTypeInt8,
+			valTypeUInt16,
+			valTypeInt16,
+			valTypeUInt32,
+			valTypeInt32,
+			valTypeUInt64,
+			valTypeInt64,
+			valTypeFloat,
+			valTypeDouble,
+			valTypeArrBytes,
+			valTypeString
+		}
 
-        public enum ScanCompareType : byte
-        {
-            ExactValue = 0,
-            FuzzyValue,
-            BiggerThan,
-            SmallerThan,
-            ValueBetween,
-            IncreasedValue,
-            IncreasedValueBy,
-            DecreasedValue,
-            DecreasedValueBy,
-            ChangedValue,
-            UnchangedValue,
-            UnknownInitialValue
-        }
+		public enum ScanCompareType : byte
+		{
+			ExactValue = 0,
+			FuzzyValue,
+			BiggerThan,
+			SmallerThan,
+			ValueBetween,
+			IncreasedValue,
+			IncreasedValueBy,
+			DecreasedValue,
+			DecreasedValueBy,
+			ChangedValue,
+			UnchangedValue,
+			UnknownInitialValue
+		}
 
 		//T extraValue = default)
-        public void ScanProcess<T>(int pid, int firstScan, byte[] selectedSections, ScanCompareType compareType, T value, T? extraValue = null) where T : struct 
+		public void ScanProcess<T>(int pid, int firstScan, byte[] selectedSections, ScanCompareType compareType, T value, T? extraValue = null) where T : struct
 		{
-            CheckConnected();
+			CheckConnected();
 
-            int typeLength = 0;
-            ScanValueType valueType;
-            byte[] valueBuffer, extraValueBuffer = null;
+			int typeLength = 0;
+			ScanValueType valueType;
+			byte[] valueBuffer, extraValueBuffer = null;
 
-            // fill in variables
-            switch (value)
-            {
-                case bool b:
-                    valueType = ScanValueType.valTypeUInt8;
-                    typeLength = 1;
-                    valueBuffer = BitConverter.GetBytes(b);
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((bool)(object)extraValue);
-                    break;
-                case sbyte sb:
-                    valueType = ScanValueType.valTypeInt8;
-                    valueBuffer = BitConverter.GetBytes(sb);
-                    typeLength = 1;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((sbyte)(object)extraValue);
-                    break;
-                case byte b:
-                    valueType = ScanValueType.valTypeUInt8;
-                    valueBuffer = BitConverter.GetBytes(b);
-                    typeLength = 1;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((byte)(object)extraValue);
-                    break;
-                case short s:
-                    valueType = ScanValueType.valTypeInt16;
-                    valueBuffer = BitConverter.GetBytes(s);
-                    typeLength = 2;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((short)(object)extraValue);
-                    break;
-                case ushort us:
-                    valueType = ScanValueType.valTypeUInt16;
-                    valueBuffer = BitConverter.GetBytes(us);
-                    typeLength = 2;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((ushort)(object)extraValue);
-                    break;
-                case int i:
-                    valueType = ScanValueType.valTypeInt32;
-                    valueBuffer = BitConverter.GetBytes(i);
-                    typeLength = 4;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((int)(object)extraValue);
-                    break;
-                case uint ui:
-                    valueType = ScanValueType.valTypeUInt32;
-                    valueBuffer = BitConverter.GetBytes(ui);
-                    typeLength = 4;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((uint)(object)extraValue);
-                    break;
-                case long l:
-                    valueType = ScanValueType.valTypeInt64;
-                    valueBuffer = BitConverter.GetBytes(l);
-                    typeLength = 8;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((long)(object)extraValue);
-                    break;
-                case ulong ul:
-                    valueType = ScanValueType.valTypeUInt64;
-                    valueBuffer = BitConverter.GetBytes(ul);
-                    typeLength = 8;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((ulong)(object)extraValue);
-                    break;
-                case float f:
-                    valueType = ScanValueType.valTypeFloat;
-                    valueBuffer = BitConverter.GetBytes(f);
-                    typeLength = 4;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((float)(object)extraValue);
-                    break;
-                case double d:
-                    valueType = ScanValueType.valTypeDouble;
-                    valueBuffer = BitConverter.GetBytes(d);
-                    typeLength = 8;
-                    if (extraValue != null)
-                        extraValueBuffer = BitConverter.GetBytes((double)(object)extraValue);
-                    break;
-                /*case string s:
+			// fill in variables
+			switch (value)
+			{
+				case bool b:
+					valueType = ScanValueType.valTypeUInt8;
+					typeLength = 1;
+					valueBuffer = BitConverter.GetBytes(b);
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((bool)(object)extraValue);
+					break;
+				case sbyte sb:
+					valueType = ScanValueType.valTypeInt8;
+					valueBuffer = BitConverter.GetBytes(sb);
+					typeLength = 1;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((sbyte)(object)extraValue);
+					break;
+				case byte b:
+					valueType = ScanValueType.valTypeUInt8;
+					valueBuffer = BitConverter.GetBytes(b);
+					typeLength = 1;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((byte)(object)extraValue);
+					break;
+				case short s:
+					valueType = ScanValueType.valTypeInt16;
+					valueBuffer = BitConverter.GetBytes(s);
+					typeLength = 2;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((short)(object)extraValue);
+					break;
+				case ushort us:
+					valueType = ScanValueType.valTypeUInt16;
+					valueBuffer = BitConverter.GetBytes(us);
+					typeLength = 2;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((ushort)(object)extraValue);
+					break;
+				case int i:
+					valueType = ScanValueType.valTypeInt32;
+					valueBuffer = BitConverter.GetBytes(i);
+					typeLength = 4;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((int)(object)extraValue);
+					break;
+				case uint ui:
+					valueType = ScanValueType.valTypeUInt32;
+					valueBuffer = BitConverter.GetBytes(ui);
+					typeLength = 4;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((uint)(object)extraValue);
+					break;
+				case long l:
+					valueType = ScanValueType.valTypeInt64;
+					valueBuffer = BitConverter.GetBytes(l);
+					typeLength = 8;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((long)(object)extraValue);
+					break;
+				case ulong ul:
+					valueType = ScanValueType.valTypeUInt64;
+					valueBuffer = BitConverter.GetBytes(ul);
+					typeLength = 8;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((ulong)(object)extraValue);
+					break;
+				case float f:
+					valueType = ScanValueType.valTypeFloat;
+					valueBuffer = BitConverter.GetBytes(f);
+					typeLength = 4;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((float)(object)extraValue);
+					break;
+				case double d:
+					valueType = ScanValueType.valTypeDouble;
+					valueBuffer = BitConverter.GetBytes(d);
+					typeLength = 8;
+					if (extraValue != null)
+						extraValueBuffer = BitConverter.GetBytes((double)(object)extraValue);
+					break;
+				/*case string s:
                     valueType = ScanValueType.valTypeString;
                     valueBuffer = Encoding.ASCII.GetBytes(s);
                     typeLength = valueBuffer.Length;
                     break;*/
-                case byte[] ba:
-                    valueType = ScanValueType.valTypeArrBytes;
-                    valueBuffer = ba;
-                    typeLength = valueBuffer.Length;
-                    break;
-                default:
-                    throw new NotSupportedException("Requested scan value type is not supported! (Use byte[] instead)");
-                    
-            }
-            // send packet
-            SendCMDPacket(CMDS.CMD_PROC_SCAN, CMD_PROC_SCAN_PACKET_SIZE, pid, firstScan, (byte)valueType, (byte)compareType, (uint)(extraValue == null ? typeLength : typeLength * 2));
+				case byte[] ba:
+					valueType = ScanValueType.valTypeArrBytes;
+					valueBuffer = ba;
+					typeLength = valueBuffer.Length;
+					break;
+				default:
+					throw new NotSupportedException("Requested scan value type is not supported! (Use byte[] instead)");
+
+			}
+			// send packet
+			SendCMDPacket(CMDS.CMD_PROC_SCAN, CMD_PROC_SCAN_PACKET_SIZE, pid, firstScan, (byte)valueType, (byte)compareType, (uint)(extraValue == null ? typeLength : typeLength * 2));
 
 			int saved = sock.ReceiveTimeout;
 			sock.ReceiveTimeout = int.MaxValue;
 
 			CheckStatus();
 
-            SendData(valueBuffer, typeLength);
-            if (extraValueBuffer != null)
-            {
-                SendData(extraValueBuffer, typeLength);
-            }
+			SendData(valueBuffer, typeLength);
+			if (extraValueBuffer != null)
+			{
+				SendData(extraValueBuffer, typeLength);
+			}
 
 			CheckStatus();
 
@@ -785,20 +785,20 @@ namespace libframe4
 			sock.ReceiveTimeout = saved;
 		}
 
-        /// <summary>
-        /// Changes protection on pages in range
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="address">Address</param>
-        /// <param name="length">Length</param>
-        /// <param name="newprot">New protection</param>
-        /// <returns></returns>
-        public void ChangeProtection(int pid, ulong address, uint length, VM_PROTECTIONS newProt)
-        {
-            CheckConnected();
+		/// <summary>
+		/// Changes protection on pages in range
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="address">Address</param>
+		/// <param name="length">Length</param>
+		/// <param name="newprot">New protection</param>
+		/// <returns></returns>
+		public void ChangeProtection(int pid, ulong address, uint length, VM_PROTECTIONS newProt)
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_PROTECT, CMD_PROC_PROTECT_PACKET_SIZE, pid, address, length, (uint)newProt);
-            CheckStatus();
+			SendCMDPacket(CMDS.CMD_PROC_PROTECT, CMD_PROC_PROTECT_PACKET_SIZE, pid, address, length, (uint)newProt);
+			CheckStatus();
 			try
 			{
 				CheckStatus();
@@ -806,51 +806,51 @@ namespace libframe4
 			catch { }
 		}
 
-        /// <summary>
-        /// Get process information
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <returns></returns>
-        public ProcessInfo GetProcessInfo(int pid)
-        {
-            CheckConnected();
+		/// <summary>
+		/// Get process information
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <returns></returns>
+		public ProcessInfo GetProcessInfo(int pid)
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_INFO, CMD_PROC_INFO_PACKET_SIZE, pid);
-            CheckStatus();
+			SendCMDPacket(CMDS.CMD_PROC_INFO, CMD_PROC_INFO_PACKET_SIZE, pid);
+			CheckStatus();
 
-            byte[] data = ReceiveData(PROC_PROC_INFO_SIZE);
-            return (ProcessInfo)GetObjectFromBytes(data, typeof(ProcessInfo));
-        }
+			byte[] data = ReceiveData(PROC_PROC_INFO_SIZE);
+			return (ProcessInfo)GetObjectFromBytes(data, typeof(ProcessInfo));
+		}
 
-        /// <summary>
-        /// Allocate RWX memory in the process space
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="length">Size of memory allocation</param>
-        /// <returns></returns>
-        public ulong AllocateMemory(int pid, int length)
-        {
-            CheckConnected();
+		/// <summary>
+		/// Allocate RWX memory in the process space
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="length">Size of memory allocation</param>
+		/// <returns></returns>
+		public ulong AllocateMemory(int pid, int length)
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_ALLOC, CMD_PROC_ALLOC_PACKET_SIZE, pid, length);
-            CheckStatus();
-            return BitConverter.ToUInt64(ReceiveData(PROC_ALLOC_SIZE), 0);
-        }
+			SendCMDPacket(CMDS.CMD_PROC_ALLOC, CMD_PROC_ALLOC_PACKET_SIZE, pid, length);
+			CheckStatus();
+			return BitConverter.ToUInt64(ReceiveData(PROC_ALLOC_SIZE), 0);
+		}
 
-        /// <summary>
-        /// Free memory in the process space
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <param name="address">Address of the memory allocation</param>
-        /// <param name="length">Size of memory allocation</param>
-        /// <returns></returns>
-        public void FreeMemory(int pid, ulong address, int length)
-        {
-            CheckConnected();
+		/// <summary>
+		/// Free memory in the process space
+		/// </summary>
+		/// <param name="pid">Process ID</param>
+		/// <param name="address">Address of the memory allocation</param>
+		/// <param name="length">Size of memory allocation</param>
+		/// <returns></returns>
+		public void FreeMemory(int pid, ulong address, int length)
+		{
+			CheckConnected();
 
-            SendCMDPacket(CMDS.CMD_PROC_FREE, CMD_PROC_FREE_PACKET_SIZE, pid, address, length);
-            CheckStatus();
-        }
+			SendCMDPacket(CMDS.CMD_PROC_FREE, CMD_PROC_FREE_PACKET_SIZE, pid, address, length);
+			CheckStatus();
+		}
 
 		public ulong[] GetScanResults(int pid)
 		{
@@ -891,109 +891,109 @@ namespace libframe4
 			return BitConverter.ToUInt64(data, 0);
 		}
 
-        public int LoadPRX(string procName, string prxPath)
-        {
-            CheckConnected();
+		public int LoadPRX(string procName, string prxPath)
+		{
+			CheckConnected();
 
-            // set timeout as it was causing issues on certain processes
-            int saved = sock.ReceiveTimeout;
-            sock.ReceiveTimeout = int.MaxValue;
+			// set timeout as it was causing issues on certain processes
+			int saved = sock.ReceiveTimeout;
+			sock.ReceiveTimeout = int.MaxValue;
 
-            byte[] procNameArray = new byte[32];
-            char[] procNameChars = procName.ToCharArray();
-            for(int i = 0; i < procNameChars.Length; i++)
-            {
-                procNameArray[i] = Convert.ToByte(procNameChars[i]);
-            }
+			byte[] procNameArray = new byte[32];
+			char[] procNameChars = procName.ToCharArray();
+			for (int i = 0; i < procNameChars.Length; i++)
+			{
+				procNameArray[i] = Convert.ToByte(procNameChars[i]);
+			}
 
-            byte[] prxPathArray = new byte[100];
-            char[] prxPathChars = prxPath.ToCharArray();
-            for (int i = 0; i < prxPathChars.Length; i++)
-            {
-                prxPathArray[i] = Convert.ToByte(prxPathChars[i]);
-            }
+			byte[] prxPathArray = new byte[100];
+			char[] prxPathChars = prxPath.ToCharArray();
+			for (int i = 0; i < prxPathChars.Length; i++)
+			{
+				prxPathArray[i] = Convert.ToByte(prxPathChars[i]);
+			}
 
-            SendCMDPacket(CMDS.CMD_PROC_PRX_LOAD, 0);
-            SendData(procNameArray, procNameArray.Length);
-            SendData(prxPathArray, prxPathArray.Length);
-            CheckStatus();
+			SendCMDPacket(CMDS.CMD_PROC_PRX_LOAD, 0);
+			SendData(procNameArray, procNameArray.Length);
+			SendData(prxPathArray, prxPathArray.Length);
+			CheckStatus();
 
-            byte[] data = ReceiveData(CMD_PROC_PRX_LOAD_RESPONSE_SIZE);
+			byte[] data = ReceiveData(CMD_PROC_PRX_LOAD_RESPONSE_SIZE);
 
-            // reset timeout
-            sock.ReceiveTimeout = saved;
+			// reset timeout
+			sock.ReceiveTimeout = saved;
 
-            return BitConverter.ToInt32(data, 0);
-        }
+			return BitConverter.ToInt32(data, 0);
+		}
 
-        public void UnloadPRX(string procName, int prxHandle)
-        {
-            CheckConnected();
+		public void UnloadPRX(string procName, int prxHandle)
+		{
+			CheckConnected();
 
-            // set timeout as it was causing issues on certain processes
+			// set timeout as it was causing issues on certain processes
 			// not a good solution but will have to do until we come up with our own loader
-            int saved = sock.ReceiveTimeout;
-            sock.ReceiveTimeout = int.MaxValue;
+			int saved = sock.ReceiveTimeout;
+			sock.ReceiveTimeout = int.MaxValue;
 
-            byte[] procNameArray = new byte[32];
-            char[] procNameChars = procName.ToCharArray();
-            for (int i = 0; i < procNameChars.Length; i++)
-            {
-                procNameArray[i] = Convert.ToByte(procNameChars[i]);
-            }
+			byte[] procNameArray = new byte[32];
+			char[] procNameChars = procName.ToCharArray();
+			for (int i = 0; i < procNameChars.Length; i++)
+			{
+				procNameArray[i] = Convert.ToByte(procNameChars[i]);
+			}
 
-            SendCMDPacket(CMDS.CMD_PROC_PRX_UNLOAD, CMD_PROC_PRX_UNLOAD_PACKET_SIZE, prxHandle);
-            SendData(procNameArray, procNameArray.Length);
-            CheckStatus();
+			SendCMDPacket(CMDS.CMD_PROC_PRX_UNLOAD, CMD_PROC_PRX_UNLOAD_PACKET_SIZE, prxHandle);
+			SendData(procNameArray, procNameArray.Length);
+			CheckStatus();
 
-            // reset timeout
-            sock.ReceiveTimeout = saved;
-        }
+			// reset timeout
+			sock.ReceiveTimeout = saved;
+		}
 
-        public T ReadMemory<T>(int pid, ulong address)
-        {
-            if (typeof(T) == typeof(string))
-            {
-                string str = "";
-                ulong i = 0;
+		public T ReadMemory<T>(int pid, ulong address)
+		{
+			if (typeof(T) == typeof(string))
+			{
+				string str = "";
+				ulong i = 0;
 
-                while (true)
-                {
-                    byte value = ReadMemory(pid, address + i, sizeof(byte))[0];
-                    if (value == 0)
-                    {
-                        break;
-                    }
-                    str += Convert.ToChar(value);
-                    i++;
-                }
+				while (true)
+				{
+					byte value = ReadMemory(pid, address + i, sizeof(byte))[0];
+					if (value == 0)
+					{
+						break;
+					}
+					str += Convert.ToChar(value);
+					i++;
+				}
 
-                return (T)(object)str;
-            }
-            
-            if (typeof(T) == typeof(byte[]))
-            {
-                throw new NotSupportedException("byte arrays are not supported, use ReadMemory(int pid, ulong address, int size)");
-            }
+				return (T)(object)str;
+			}
 
-            return (T)GetObjectFromBytes(ReadMemory(pid, address, Marshal.SizeOf(typeof(T))), typeof(T));
-        }
+			if (typeof(T) == typeof(byte[]))
+			{
+				throw new NotSupportedException("byte arrays are not supported, use ReadMemory(int pid, ulong address, int size)");
+			}
 
-        public void WriteMemory<T>(int pid, ulong address, T value)
-        {
-            if (typeof(T) == typeof(string))
-            {
-                WriteMemory(pid, address, Encoding.ASCII.GetBytes((string)(object)value + (char)0x0));
-                return;
-            }
+			return (T)GetObjectFromBytes(ReadMemory(pid, address, Marshal.SizeOf(typeof(T))), typeof(T));
+		}
 
-            if (typeof(T) == typeof(byte[]))
-            {
-                WriteMemory(pid, address, (byte[])(object)value);
-                return;
-            }
-            
-            WriteMemory(pid, address, GetBytesFromObject(value));
-        }
-    }
+		public void WriteMemory<T>(int pid, ulong address, T value)
+		{
+			if (typeof(T) == typeof(string))
+			{
+				WriteMemory(pid, address, Encoding.ASCII.GetBytes((string)(object)value + (char)0x0));
+				return;
+			}
+
+			if (typeof(T) == typeof(byte[]))
+			{
+				WriteMemory(pid, address, (byte[])(object)value);
+				return;
+			}
+
+			WriteMemory(pid, address, GetBytesFromObject(value));
+		}
+	}
 }
