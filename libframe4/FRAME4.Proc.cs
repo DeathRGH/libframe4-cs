@@ -11,6 +11,7 @@ namespace libframe4
     {
         // proc
         // packet sizes
+
         // send size
         private const int CMD_PROC_READ_PACKET_SIZE = 16;
         private const int CMD_PROC_WRITE_PACKET_SIZE = 16;
@@ -32,7 +33,6 @@ namespace libframe4
 
         private const int CMD_PROC_PRX_UNLOAD_PACKET_SIZE = 4;
 
-
         // receive size
         private const int PROC_LIST_ENTRY_SIZE = 36;
         private const int PROC_MAP_ENTRY_SIZE = 58;
@@ -45,7 +45,6 @@ namespace libframe4
         private const int CMD_SCAN_COUNT_RESULTS_RESPONSE_SIZE = 8;
 
         private const int CMD_PROC_PRX_LOAD_RESPONSE_SIZE = 4;
-
 
         /// <summary>
         /// Get current process list
@@ -658,8 +657,7 @@ namespace libframe4
         }
 
 		//T extraValue = default)
-        public void ScanProcess<T>(int pid, int firstScan, byte[] selectedSections, ScanCompareType compareType, T value, T? extraValue = null)
-			where T : struct 
+        public void ScanProcess<T>(int pid, int firstScan, byte[] selectedSections, ScanCompareType compareType, T value, T? extraValue = null) where T : struct 
 		{
             CheckConnected();
 
@@ -758,7 +756,7 @@ namespace libframe4
                     typeLength = valueBuffer.Length;
                     break;
                 default:
-                    throw new NotSupportedException("Requested scan value type is not supported! (Feed in Byte[] instead)");
+                    throw new NotSupportedException("Requested scan value type is not supported! (Use byte[] instead)");
                     
             }
             // send packet
@@ -862,7 +860,7 @@ namespace libframe4
 			if (resultCount <= 0)
 				return new ulong[0];
 			else if (resultCount > 1000000)
-				throw new Exception("too many scan results");
+				throw new Exception("libframe4: too many scan results");
 
 			SendCMDPacket(CMDS.CMD_PROC_SCAN_GET_RESULTS, CMD_SCAN_GET_RESULTS_PACKET_SIZE, pid);
 
@@ -933,6 +931,7 @@ namespace libframe4
             CheckConnected();
 
             // set timeout as it was causing issues on certain processes
+			// not a good solution but will have to do until we come up with our own loader
             int saved = sock.ReceiveTimeout;
             sock.ReceiveTimeout = int.MaxValue;
 

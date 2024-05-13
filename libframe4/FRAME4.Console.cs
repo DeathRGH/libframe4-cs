@@ -7,6 +7,7 @@ namespace libframe4
 	{
 		// console
 		// packet sizes
+		
 		// send size
 		private const int CMD_CONSOLE_PRINT_PACKET_SIZE = 4;
 		private const int CMD_CONSOLE_NOTIFY_PACKET_SIZE = 8;
@@ -14,7 +15,6 @@ namespace libframe4
 
 		// receive size
 		private const int CONSOLE_INFO_SIZE = 308;
-
 
 		// console
 		// note: the disconnect command actually uses the console api to end the connection

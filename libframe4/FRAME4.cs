@@ -21,11 +21,11 @@ namespace libframe4
 
         // some global values
         private const string LIBRARY_VERSION = "0.2.0";
-		private const int PS4DBG_PORT = 2811;//744;
-		private const int PS4DBG_DEBUG_PORT = 42069;//755;
-		private const int NET_MAX_LENGTH = 0x20000; //128KB buffer   //0x100000; //1MB buffer
+		private const int PS4DBG_PORT = 2811;
+		private const int PS4DBG_DEBUG_PORT = 42069;
+		private const int NET_MAX_LENGTH = 0x20000; // 128KB buffer
 
-		private const int BROADCAST_PORT = 2813;//1010;
+		private const int BROADCAST_PORT = 2813;
         private const uint BROADCAST_MAGIC = 0xFFFFAAAA;
 
         // from protocol.h

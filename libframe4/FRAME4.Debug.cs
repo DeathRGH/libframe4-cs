@@ -9,9 +9,10 @@ namespace libframe4
 {
     public partial class FRAME4
     {
-        //debug
+        // debug
         // packet sizes
-        //send size
+
+        // send size
         private const int CMD_DEBUG_ATTACH_PACKET_SIZE = 4;
         private const int CMD_DEBUG_BREAKPT_PACKET_SIZE = 16;
         private const int CMD_DEBUG_WATCHPT_PACKET_SIZE = 24;
@@ -21,7 +22,8 @@ namespace libframe4
         private const int CMD_DEBUG_SETREGS_PACKET_SIZE = 8;
         private const int CMD_DEBUG_STOPGO_PACKET_SIZE = 4;
         private const int CMD_DEBUG_THRINFO_PACKET_SIZE = 4;
-        //receive size
+
+        // receive size
         private const int DEBUG_INTERRUPT_SIZE = 0x4A0;
         private const int DEBUG_THRINFO_SIZE = 40;
         private const int DEBUG_REGS_SIZE = 0xB0;
@@ -40,6 +42,7 @@ namespace libframe4
             public dbregs dbreg64;
         }
 
+		// to be replaced with selectable interface
 		public static string GetLocalIPAddress()
 		{
 			string localIP;

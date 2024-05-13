@@ -5,13 +5,14 @@ namespace libframe4
     public partial class FRAME4
     {
         // kernel
-        //packet sizes
-        //send size
+        // packet sizes
+
+        // send size
         private const int CMD_KERN_READ_PACKET_SIZE = 12;
         private const int CMD_KERN_WRITE_PACKET_SIZE = 12;
-        //receive size
-        private const int KERN_BASE_SIZE = 8;
 
+        // receive size
+        private const int KERN_BASE_SIZE = 8;
 
         /// <summary>
         /// Get kernel base address
