@@ -20,7 +20,7 @@ namespace libframe4
 		private Thread debugThread = null;
 
 		// some global values
-		private const string LIBRARY_VERSION = "0.2.0";
+		private const string LIBRARY_VERSION = "0.2.2";
 		private const int PS4DBG_PORT = 2811;
 		private const int PS4DBG_DEBUG_PORT = 42069;
 		private const int NET_MAX_LENGTH = 0x20000; // 128KB buffer
