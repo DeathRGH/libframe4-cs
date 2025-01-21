@@ -20,7 +20,7 @@ namespace libframe4
 		private Thread debugThread = null;
 
 		// some global values
-		private const string LIBRARY_VERSION = "0.2.5";
+		private const string LIBRARY_VERSION = "0.2.7";
 		private const int PS4DBG_PORT = 2811;
 		private const int PS4DBG_DEBUG_PORT = 42069;
 		private const int NET_MAX_LENGTH = 0x20000; // 128KB buffer
@@ -75,6 +75,7 @@ namespace libframe4
 			CMD_PROC_SCAN_COUNT_RESULTS = 0xBDAA000E,
 			CMD_PROC_PRX_LOAD = 0xBDAA000F,
 			CMD_PROC_PRX_UNLOAD = 0xBDAA0010,
+			CMD_PROC_PRX_LIST = 0xBDAA0011,
 
 			CMD_DEBUG_ATTACH = 0xBDBB0001,
 			CMD_DEBUG_DETACH = 0xBDBB0002,

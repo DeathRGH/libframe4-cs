@@ -32,6 +32,7 @@ namespace libframe4
 		private const int CMD_SCAN_END_PACKET_SIZE = 4;
 
 		private const int CMD_PROC_PRX_UNLOAD_PACKET_SIZE = 4;
+		private const int CMD_PROC_PRX_LIST_PACKET_SIZE = 4;
 
 		// receive size
 		private const int PROC_LIST_ENTRY_SIZE = 36;
@@ -41,6 +42,7 @@ namespace libframe4
 		private const int PROC_ELF_SIZE = 8;
 		private const int PROC_PROC_INFO_SIZE = 188;
 		private const int PROC_ALLOC_SIZE = 8;
+		private const int PROC_PRX_LIST_ENTRY_SIZE = 284;
 
 		private const int CMD_SCAN_COUNT_RESULTS_RESPONSE_SIZE = 8;
 
@@ -949,6 +951,40 @@ namespace libframe4
 
 			// reset timeout
 			sock.ReceiveTimeout = saved;
+		}
+
+		public ModuleList GetModuleList(int pid)
+		{
+			CheckConnected();
+				
+			SendCMDPacket(CMDS.CMD_PROC_PRX_LIST, CMD_PROC_PRX_LIST_PACKET_SIZE, pid);
+			CheckStatus();
+				
+			// recv count
+			byte[] bnumber = new byte[4];
+			sock.Receive(bnumber, 4, SocketFlags.None);
+			int number = BitConverter.ToInt32(bnumber, 0);
+				
+			// recv data
+			byte[] data = ReceiveData(number * PROC_PRX_LIST_ENTRY_SIZE);
+				
+			// parse data
+			ModuleListEntry[] entries = new ModuleListEntry[number];
+			for (int i = 0; i < number; i++)
+			{
+				int offset = i * PROC_PRX_LIST_ENTRY_SIZE;
+				entries[i] = new ModuleListEntry
+				{
+					handle = BitConverter.ToUInt32(data, offset),
+					name = ConvertASCII(data, offset + 4),
+					text_address = BitConverter.ToUInt64(data, offset + 260),
+					text_size = BitConverter.ToUInt32(data, offset + 268),
+					data_address = BitConverter.ToUInt64(data, offset + 272),
+					data_size = BitConverter.ToUInt32(data, offset + 280)
+				};
+			}
+				
+			return new ModuleList(pid, entries);
 		}
 
 		public T ReadMemory<T>(int pid, ulong address)
