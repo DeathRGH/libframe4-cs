@@ -81,7 +81,7 @@ namespace libframe4
 			DebuggerInterruptCallback callback = (DebuggerInterruptCallback)obj;
 
 			IPAddress ip = IPAddress.Parse(GetLocalIPAddress());
-			IPEndPoint endpoint = new IPEndPoint(ip, PS4DBG_DEBUG_PORT);
+			IPEndPoint endpoint = new IPEndPoint(ip, FRAME4_DEBUG_PORT);
 
 			Socket server = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 

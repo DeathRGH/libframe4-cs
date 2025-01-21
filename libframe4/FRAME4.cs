@@ -21,8 +21,8 @@ namespace libframe4
 
 		// some global values
 		private const string LIBRARY_VERSION = "0.2.7";
-		private const int PS4DBG_PORT = 2811;
-		private const int PS4DBG_DEBUG_PORT = 42069;
+		private const int FRAME4_PORT = 2811;
+		private const int FRAME4_DEBUG_PORT = 42069;
 		private const int NET_MAX_LENGTH = 0x20000; // 128KB buffer
 
 		private const int BROADCAST_PORT = 2813;
@@ -365,17 +365,17 @@ namespace libframe4
 		}
 
 		/// <summary>
-		/// Initializes PS4DBG class
+		/// Initializes FRAME4 class
 		/// </summary>
 		/// <param name="addr">PlayStation 4 address</param>
 		public FRAME4(IPAddress addr)
 		{
-			enp = new IPEndPoint(addr, PS4DBG_PORT);
+			enp = new IPEndPoint(addr, FRAME4_PORT);
 			sock = new Socket(enp.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 		}
 
 		/// <summary>
-		/// Initializes PS4DBG class
+		/// Initializes FRAME4 class
 		/// </summary>
 		/// <param name="ip">PlayStation 4 ip address</param>
 		public FRAME4(string ip)
@@ -390,7 +390,7 @@ namespace libframe4
 				throw ex;
 			}
 
-			enp = new IPEndPoint(addr, PS4DBG_PORT);
+			enp = new IPEndPoint(addr, FRAME4_PORT);
 			sock = new Socket(enp.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 		}
 
