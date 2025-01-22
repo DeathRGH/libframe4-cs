@@ -41,7 +41,7 @@ namespace libframe4
 		//    uint64_t address;
 		//    uint8_t original;
 		//};
-		public static uint MAX_BREAKPOINTS = 10;
+		public static uint MAX_BREAKPOINTS = 30;
 		public static uint MAX_WATCHPOINTS = 4;
 
 		//  struct cmd_packet {
