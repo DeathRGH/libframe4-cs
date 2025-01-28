@@ -14,7 +14,7 @@ namespace libframe4
         private const int CMD_CONSOLE_FANTHRESHOLD_PACKET_SIZE = 1;
 
         // receive size
-        private const int CONSOLE_INFO_SIZE = 308;
+        private const int CONSOLE_INFO_SIZE = 332;
 
         // console
         // note: the disconnect command actually uses the console api to end the connection
@@ -82,6 +82,13 @@ namespace libframe4
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct ConsoleInfo
     {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public byte[] psid;
+
+        public int upd_version;
+
+        public int sdk_version;
+
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 50)]
         public string kernelOsType;
 
