@@ -11,10 +11,12 @@ namespace libframe4
         // send size
         private const int CMD_KERN_READ_PACKET_SIZE = 12;
         private const int CMD_KERN_WRITE_PACKET_SIZE = 12;
+        private const int CMD_KERN_RDMSR_SIZE = 4;
 
         // receive size
         private const int KERN_BASE_SIZE = 8;
         private const int KERN_MAP_ENTRY_SIZE = 58;
+        private const int KERN_RDMSR_SIZE = 8;
 
         /// <summary>
         /// Get kernel base address
@@ -91,10 +93,23 @@ namespace libframe4
                     offset = BitConverter.ToUInt64(data, offset + 48),
                     prot = BitConverter.ToUInt16(data, offset + 56)
                 };
-
             }
 
             return new KernelVmMap(entries);
+        }
+
+        /// <summary>
+        /// Read the Machine Specific Register
+        /// </summary>
+        /// <param name="reg">Register</param>
+        /// <returns></returns>
+        public ulong ReadMSR(uint reg)
+        {
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_KERN_RDMSR, CMD_KERN_RDMSR_SIZE, reg);
+            CheckStatus();
+            return BitConverter.ToUInt64(ReceiveData(KERN_RDMSR_SIZE), 0);
         }
     }
 }

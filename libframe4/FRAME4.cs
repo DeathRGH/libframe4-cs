@@ -19,7 +19,7 @@ namespace libframe4
 
         private Thread debugThread = null;
 
-        private const string LIBRARY_VERSION = "0.2.11";
+        private const string LIBRARY_VERSION = "0.2.12";
         private const int FRAME4_PORT = 2811;
         private const int FRAME4_DEBUG_PORT = 42069;
         private const int NET_MAX_LENGTH = 0x20000; // 128KB buffer
@@ -97,6 +97,7 @@ namespace libframe4
             CMD_KERN_READ = 0xBDCC0002,
             CMD_KERN_WRITE = 0xBDCC0003,
             CMD_KERN_VM_MAP = 0xBDCC0004,
+            CMD_KERN_RDMSR = 0xBDCC0005,
 
             CMD_CONSOLE_REBOOT = 0xBDDD0001,
             CMD_CONSOLE_END = 0xBDDD0002,
