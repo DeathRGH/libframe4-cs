@@ -71,6 +71,22 @@ namespace libframe4
         }
 
         /// <summary>
+        /// Get the console PSID as string
+        /// </summary>
+        public string GetPSID()
+        {
+            ConsoleInfo ci = GetConsoleInformation();
+
+            StringBuilder sb = new StringBuilder(ci.psid.Length * 2);
+            foreach (byte b in ci.psid)
+            {
+                sb.AppendFormat("{0:X2}", b);
+            }
+
+            return sb.ToString().Trim();
+        }
+
+        /// <summary>
         /// Set the fan threshold temperature in degrees celsius
         /// </summary>
         public void SetFanThresholdCelsius(byte temperature)
