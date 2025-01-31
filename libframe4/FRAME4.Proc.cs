@@ -34,6 +34,8 @@ namespace libframe4
         private const int CMD_PROC_PRX_UNLOAD_PACKET_SIZE = 4;
         private const int CMD_PROC_PRX_LIST_PACKET_SIZE = 4;
 
+        private const int CMD_PROC_AOB_PACKET_SIZE = 20;
+
         // receive size
         private const int PROC_LIST_ENTRY_SIZE = 36;
         private const int PROC_MAP_ENTRY_SIZE = 58;
@@ -47,6 +49,8 @@ namespace libframe4
         private const int CMD_SCAN_COUNT_RESULTS_RESPONSE_SIZE = 8;
 
         private const int CMD_PROC_PRX_LOAD_RESPONSE_SIZE = 4;
+
+        private const int CMD_PROC_AOB_RESPONSE_SIZE = 8;
 
         /// <summary>
         /// Get current process list
@@ -986,6 +990,85 @@ namespace libframe4
             }
 
             return new ModuleList(pid, entries);
+        }
+
+        /// <summary>
+        /// Scan for Array Of Bytes in a memory region and return the address if it is found
+        /// <para>Specify null for "mask" to be a exact match</para>
+        /// <para>Specify a byte array of the same length as aob to mask the array with 0 and 1 (values greater than 1 are treated as 1)</para>
+        /// <para>e.g. [1, 0, 0, 1, 1] first byte needs to match, second and third byte can be any number, ...</para>
+        /// </summary>
+        /// <param name="pid">Process ID</param>
+        /// <param name="start">Address of where to start the scan</param>
+        /// <param name="length">Size of memory to scan</param>
+        /// <param name="aob_length">Length of the "aob" byte array to search for</param>
+        /// <param name="aob">Byte array to search for</param>
+        /// <param name="mask">Mask the aob byte array to search for</param>
+        public ulong ScanAOB(int pid, ulong start, uint length, uint aob_length, byte[] aob, byte[] mask)
+        {
+            if (aob == null)
+            {
+                throw new Exception("aob can not be null");
+            }
+            if (aob.Length != aob_length)
+            {
+                throw new Exception("aob.Length != aob_length");
+            }
+            
+            if ((mask != null))
+            {
+                if (mask.Length != aob.Length)
+                {
+                    throw new Exception("mask and aob size missmatch (mask.Length != aob.Length)");
+                }
+
+                bool masked = false;
+                for (int i = 0; i < mask.Length; i++)
+                {
+                    if (mask[i] != 0)
+                    {
+                        masked = true;
+                        break;
+                    }
+                }
+
+                if (!masked)
+                {
+                    throw new Exception("the mask specified does not mask any byte");
+                }
+            }
+
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_PROC_AOB, CMD_PROC_AOB_PACKET_SIZE, pid, start, length, aob_length);
+            CheckStatus();
+
+            // save timeout and set it to max, scan can take a while
+            int saved = sock.ReceiveTimeout;
+            sock.ReceiveTimeout = int.MaxValue;
+
+            SendData(aob, aob.Length);
+            if (mask == null)
+            {
+                byte[] tmpMask = new byte[aob.Length];
+                for (int i = 0; i < tmpMask.Length; i++)
+                {
+                    tmpMask[i] = 1;
+                }
+                SendData(tmpMask, tmpMask.Length);
+            }
+            else
+            {
+                SendData(mask, mask.Length);
+            }
+            CheckStatus();
+
+            ulong aob_address = BitConverter.ToUInt64(ReceiveData(CMD_PROC_AOB_RESPONSE_SIZE), 0);
+
+            // reset timeout
+            sock.ReceiveTimeout = saved;
+
+            return aob_address;
         }
 
         public T ReadMemory<T>(int pid, ulong address)
