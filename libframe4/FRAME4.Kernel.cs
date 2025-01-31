@@ -63,7 +63,7 @@ namespace libframe4
         }
 
         /// <summary>
-        /// Get the kernel memory map
+        /// Get the kernel virtual memory map
         /// </summary>
         /// <returns></returns>
         public KernelVmMap GetKernelVmMap()
@@ -110,6 +110,7 @@ namespace libframe4
 
             SendCMDPacket(CMDS.CMD_KERN_RDMSR, CMD_KERN_RDMSR_SIZE, reg);
             CheckStatus();
+
             return BitConverter.ToUInt64(ReceiveData(KERN_RDMSR_SIZE), 0);
         }
 
@@ -125,6 +126,7 @@ namespace libframe4
 
             SendCMDPacket(CMDS.CMD_KERN_PHYS_READ, CMD_KERN_PHYS_READ_PACKET_SIZE, address, length);
             CheckStatus();
+
             return ReceiveData(length);
         }
     }

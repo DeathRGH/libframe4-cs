@@ -70,11 +70,27 @@ namespace libframe4
             return (ConsoleInfo)GetObjectFromBytes(ReceiveData(CONSOLE_INFO_SIZE), typeof(ConsoleInfo));
         }
 
-        public void SetFanThreshold(byte temperature)
+        /// <summary>
+        /// Set the fan threshold temperature in degrees celsius
+        /// </summary>
+        public void SetFanThresholdCelsius(byte temperature)
         {
             CheckConnected();
 
             SendCMDPacket(CMDS.CMD_CONSOLE_FANTHRESHOLD, CMD_CONSOLE_FANTHRESHOLD_PACKET_SIZE, temperature);
+            CheckStatus();
+        }
+
+        /// <summary>
+        /// Set the fan threshold temperature in degrees fahrenheit
+        /// </summary>
+        public void SetFanThresholdFahrenheit(byte temperature)
+        {
+            CheckConnected();
+
+            byte celsius = (byte)(5.0f / 9.0f * (float)(temperature - 32));
+
+            SendCMDPacket(CMDS.CMD_CONSOLE_FANTHRESHOLD, CMD_CONSOLE_FANTHRESHOLD_PACKET_SIZE, celsius);
             CheckStatus();
         }
     }
