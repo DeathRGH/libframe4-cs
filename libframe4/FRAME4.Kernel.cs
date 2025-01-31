@@ -12,6 +12,7 @@ namespace libframe4
         private const int CMD_KERN_READ_PACKET_SIZE = 12;
         private const int CMD_KERN_WRITE_PACKET_SIZE = 12;
         private const int CMD_KERN_RDMSR_SIZE = 4;
+        private const int CMD_KERN_PHYS_READ_PACKET_SIZE = 12;
 
         // receive size
         private const int KERN_BASE_SIZE = 8;
@@ -110,6 +111,21 @@ namespace libframe4
             SendCMDPacket(CMDS.CMD_KERN_RDMSR, CMD_KERN_RDMSR_SIZE, reg);
             CheckStatus();
             return BitConverter.ToUInt64(ReceiveData(KERN_RDMSR_SIZE), 0);
+        }
+
+        /// <summary>
+        /// Read physical memory
+        /// </summary>
+        /// <param name="address">Memory address</param>
+        /// <param name="length">Data length</param>
+        /// <returns></returns>
+        public byte[] ReadPhysicalMemory(ulong address, int length)
+        {
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_KERN_PHYS_READ, CMD_KERN_PHYS_READ_PACKET_SIZE, address, length);
+            CheckStatus();
+            return ReceiveData(length);
         }
     }
 }
