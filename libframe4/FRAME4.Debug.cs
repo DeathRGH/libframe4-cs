@@ -22,6 +22,7 @@ namespace libframe4
         private const int CMD_DEBUG_SETREGS_PACKET_SIZE = 8;
         private const int CMD_DEBUG_STOPGO_PACKET_SIZE = 4;
         private const int CMD_DEBUG_THRINFO_PACKET_SIZE = 4;
+        private const int CMD_DEBUG_EXT_STOPGO_PACKET_SIZE = 5;
 
         // receive size
         private const int DEBUG_INTERRUPT_SIZE = 0x4A0;
@@ -200,6 +201,45 @@ namespace libframe4
             CheckDebugging();
 
             SendCMDPacket(CMDS.CMD_DEBUG_STOPGO, CMD_DEBUG_STOPGO_PACKET_SIZE, 0);
+            CheckStatus();
+        }
+
+        /// <summary>
+        /// Stop the current process without detach the debugger.
+        /// This feature has been supported since PACKET_VERSION 0.2.15
+        /// </summary>
+        /// <param name="pid"></param>
+        public void ProcessExtStop(int pid)
+        {
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_DEBUG_EXT_STOPGO, CMD_DEBUG_EXT_STOPGO_PACKET_SIZE, (uint)pid, (byte)1);
+            CheckStatus();
+        }
+
+        /// <summary>
+        /// Resume the current process without detach the debugger.
+        /// This feature has been supported since PACKET_VERSION 0.2.15
+        /// </summary>
+        /// <param name="pid"></param>
+        public void ProcessExtKill(int pid)
+        {
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_DEBUG_EXT_STOPGO, CMD_DEBUG_EXT_STOPGO_PACKET_SIZE, (uint)pid, (byte)2);
+            CheckStatus();
+        }
+
+        /// <summary>
+        /// Kill the current process without detach the debugger.
+        /// This feature has been supported since PACKET_VERSION 0.2.15
+        /// </summary>
+        /// <param name="pid"></param>
+        public void ProcessExtResume(int pid)
+        {
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_DEBUG_EXT_STOPGO, CMD_DEBUG_EXT_STOPGO_PACKET_SIZE, (uint)pid, (byte)0);
             CheckStatus();
         }
 
