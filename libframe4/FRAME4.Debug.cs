@@ -11,7 +11,7 @@ namespace libframe4
     {
         // debug
         // packet sizes
-
+        
         // send size
         private const int CMD_DEBUG_ATTACH_PACKET_SIZE = 4;
         private const int CMD_DEBUG_BREAKPT_PACKET_SIZE = 16;
@@ -21,6 +21,7 @@ namespace libframe4
         private const int CMD_DEBUG_GETREGS_PACKET_SIZE = 4;
         private const int CMD_DEBUG_SETREGS_PACKET_SIZE = 8;
         private const int CMD_DEBUG_STOPGO_PACKET_SIZE = 4;
+        private const int CMD_DEBUG_EXT_STOPGO_PACKET_SIZE = 8;
         private const int CMD_DEBUG_THRINFO_PACKET_SIZE = 4;
 
         // receive size
@@ -200,6 +201,45 @@ namespace libframe4
             CheckDebugging();
 
             SendCMDPacket(CMDS.CMD_DEBUG_STOPGO, CMD_DEBUG_STOPGO_PACKET_SIZE, 0);
+            CheckStatus();
+        }
+
+        /// <summary>
+        /// Stop a process
+        /// </summary>
+        /// <param name="pid">Process ID</param>
+        /// <returns></returns>
+        public void ProcessExtStop(int pid)
+        {
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_DEBUG_EXT_STOPGO, CMD_DEBUG_EXT_STOPGO_PACKET_SIZE, pid, 1);
+            CheckStatus();
+        }
+
+        /// <summary>
+        /// Kill a process, it will detach before doing so
+        /// </summary>
+        /// <param name="pid">Process ID</param>
+        /// <returns></returns>
+        public void ProcessExtKill(int pid)
+        {
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_DEBUG_EXT_STOPGO, CMD_DEBUG_EXT_STOPGO_PACKET_SIZE, pid, 2);
+            CheckStatus();
+        }
+
+        /// <summary>
+        /// Resume a process
+        /// </summary>
+        /// <param name="pid">Process ID</param>
+        /// <returns></returns>
+        public void ProcessExtResume(int pid)
+        {
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_DEBUG_EXT_STOPGO, CMD_DEBUG_EXT_STOPGO_PACKET_SIZE, pid, 0);
             CheckStatus();
         }
 
