@@ -11,7 +11,7 @@ namespace libframe4
     {
         // debug
         // packet sizes
-        
+
         // send size
         private const int CMD_DEBUG_ATTACH_PACKET_SIZE = 4;
         private const int CMD_DEBUG_BREAKPT_PACKET_SIZE = 16;
@@ -21,8 +21,8 @@ namespace libframe4
         private const int CMD_DEBUG_GETREGS_PACKET_SIZE = 4;
         private const int CMD_DEBUG_SETREGS_PACKET_SIZE = 8;
         private const int CMD_DEBUG_STOPGO_PACKET_SIZE = 4;
-        private const int CMD_DEBUG_EXT_STOPGO_PACKET_SIZE = 8;
         private const int CMD_DEBUG_THRINFO_PACKET_SIZE = 4;
+        private const int CMD_DEBUG_EXT_STOPGO_PACKET_SIZE = 8;
 
         // receive size
         private const int DEBUG_INTERRUPT_SIZE = 0x4A0;
@@ -205,6 +205,19 @@ namespace libframe4
         }
 
         /// <summary>
+        /// Resume a process
+        /// </summary>
+        /// <param name="pid">Process ID</param>
+        /// <returns></returns>
+        public void ProcessExtResume(int pid)
+        {
+            CheckConnected();
+
+            SendCMDPacket(CMDS.CMD_DEBUG_EXT_STOPGO, CMD_DEBUG_EXT_STOPGO_PACKET_SIZE, pid, 0);
+            CheckStatus();
+        }
+
+        /// <summary>
         /// Stop a process
         /// </summary>
         /// <param name="pid">Process ID</param>
@@ -227,19 +240,6 @@ namespace libframe4
             CheckConnected();
 
             SendCMDPacket(CMDS.CMD_DEBUG_EXT_STOPGO, CMD_DEBUG_EXT_STOPGO_PACKET_SIZE, pid, 2);
-            CheckStatus();
-        }
-
-        /// <summary>
-        /// Resume a process
-        /// </summary>
-        /// <param name="pid">Process ID</param>
-        /// <returns></returns>
-        public void ProcessExtResume(int pid)
-        {
-            CheckConnected();
-
-            SendCMDPacket(CMDS.CMD_DEBUG_EXT_STOPGO, CMD_DEBUG_EXT_STOPGO_PACKET_SIZE, pid, 0);
             CheckStatus();
         }
 

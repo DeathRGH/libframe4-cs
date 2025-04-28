@@ -19,7 +19,7 @@ namespace libframe4
 
         private Thread debugThread = null;
 
-        private const string LIBRARY_VERSION = "0.2.14";
+        private const string LIBRARY_VERSION = "0.3.2";
         private const int FRAME4_PORT = 2811;
         private const int FRAME4_DEBUG_PORT = 42069;
         private const int NET_MAX_LENGTH = 0x20000; // 128KB buffer
@@ -91,9 +91,9 @@ namespace libframe4
             CMD_DEBUG_GETDBGREGS = 0xBDBB000C,
             CMD_DEBUG_SETDBGREGS = 0xBDBB000D,
             CMD_DEBUG_STOPGO = 0xBDBB0010,
-            CMD_DEBUG_EXT_STOPGO = 0xBDBB0500,
             CMD_DEBUG_THRINFO = 0xBDBB0011,
             CMD_DEBUG_SINGLESTEP = 0xBDBB0012,
+            CMD_DEBUG_EXT_STOPGO = 0xBDBB0500,
 
             CMD_KERN_BASE = 0xBDCC0001,
             CMD_KERN_READ = 0xBDCC0002,
@@ -488,7 +488,7 @@ namespace libframe4
         }
 
         /// <summary>
-        /// Unload the current Frame4 running on the console
+        /// Unload the current frame4 running on the console
         /// </summary>
         public void UnloadPayload()
         {
